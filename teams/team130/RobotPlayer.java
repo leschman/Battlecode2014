@@ -1,34 +1,126 @@
 package team130;
 
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
+import battlecode.common.*;
 
+/**
+ * 
+ * @author Logan Esch, Andrew Wilson, Michael Manning
+ * @category Base class for our Robot Player.
+ * 
+ */
 public class RobotPlayer {
+
+	/**
+	 * The robot controller.
+	 */
+	static RobotController rc;
+
+	/**
+	 * Seed for messaging channel randomization.
+	 */
+	static int mult = 271;
+
+	/**
+	 * Current location of robot.
+	 */
+	static MapLocation myLoc;
+
+	/**
+	 * Friendly HQ location.
+	 */
+	static MapLocation hqLoc;
+
+	/**
+	 * Enemy HQ Location.
+	 */
+	static MapLocation enemyHQLoc;
 	
-	public static void run(RobotController rc){
-		while(true){
-			
+	/**
+	 * The channel we are communicating on. 
+	 */
+	static int channel;
+
+	/**
+	 * RUN <br>
+	 * 
+	 * Main function to determine type of robot and run that type's code.
+	 * 
+	 * @param myRC
+	 *            Robot controller for calling functions.
+	 */
+	public static void run(RobotController myRC) {
+		rc = myRC;
+		if (rc.getTeam() == Team.A)
+			/**
+			 * Change mult base on what team we are.
+			 */
+			mult = 104;
+
+		while (true) {
+			try {
+				/**
+				 * Select what type of robot is executing and run it's code.
+				 */
+				if (rc.getType() == RobotType.SOLDIER) {
+					Soldier.run();
+				} else if (rc.getType() == RobotType.HQ) {
+					HQ.run();
+				}
+			} catch (Exception e) {
+				System.out.println("caught exception before it killed us:");
+				e.printStackTrace();
+			}
+			rc.yield();
 		}
 	}
-	
-	/**MAPLOCATION TO INT
+
+	/**
+	 * GET CHANNEL<br>
 	 * 
-	 * @param maplocation the location to convert to an int.
-	 * @return an integer representation of the MapLocation for broadcasting. 
+	 * Scrambling method to scramble the channel.
+	 * 
+	 * @return int; The channel we are using this round.
 	 */
-	public static int mapLocationToInt(MapLocation maplocation){
-		return (maplocation.x * 1000 + maplocation.y);
+	public static int getChannel() {
+		int clock = Clock.getRoundNum();
+		int channel = (clock * mult + 6) % GameConstants.BROADCAST_MAX_CHANNELS;
+		return channel;
 	}
-	
-	/**INT TO MAPLOCATION
+
+	/**
+	 * MAP LOCATION TO INT<br>
 	 * 
-	 * @param loc int to convert to MapLocation
-	 * @return a MapLocation that was represented by the int. 
+	 * Converts a mapLocation into an int for sending messages.
+	 * 
+	 * @param loc
+	 *            MapLocation to broadcast.
+	 * @return int; Representing that location
+	 * 
+	 *         TODO: get rid of scrambling, not needed in this version. 
 	 */
-	public static MapLocation intToMapLocation(int loc){
-		int x = loc / 1000;
-		int y = loc - (1000 * x);
-		return new MapLocation(x,y);
+	public static int MapLocationToInt(MapLocation loc) {
+		return loc.x * 1000 + loc.y;
+	}
+
+	/**
+	 * INT TO MAP LOCATION<br>
+	 * 
+	 * Converts an int into a mapLocation.
+	 * 
+	 * @param mint
+	 *            The int from the message.
+	 * @return MapLocation; From the message int.
+	 * 
+	 *         TODO: get rid of scrambling, not needed in this version. 
+	 */
+	public static MapLocation intToMaplocation(int mint) {
+		int y = mint % 1000;
+		int x = (mint - y) / 1000;
+		if (x == 0 && y == 0) {
+			return null;
+		} else {
+			return new MapLocation(x, y);
+		}
 	}
 
 }

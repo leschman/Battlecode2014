@@ -6,6 +6,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.Robot;
 import battlecode.common.RobotInfo;
+import battlecode.common.TerrainTile;
 
 /**
  * 
@@ -52,6 +53,8 @@ public class Soldier extends RobotPlayer {
 	 */
 	final static int offNearEnemyAttraction = 10;
 
+	final static int cowAttraction = 10;
+
 	/**
 	 * Attraction from far enemy units when we out-number enemy.
 	 */
@@ -60,10 +63,8 @@ public class Soldier extends RobotPlayer {
 	/**
 	 * Variable to control vision used for swarm behavior. <br>
 	 * <br>
-	 * Should be 14 when we don't have VISON UPGRADE. <br>
-	 * Should be 33 when we have VISION UPGRADE.
 	 */
-	static int vision = 14;
+	static int vision = 35;
 	/**
 	 * Robot's type, <br>
 	 * <br>
@@ -234,9 +235,7 @@ public class Soldier extends RobotPlayer {
 
 		} else if (2 < charlesJungTest && charlesJungTest <= 4) {
 			type = Type.DEFENDER;
-		} else if (charlesJungTest <= 2) {
-			type = Type.PROBE; // Probe
-			// System.out.println("Made Probe");
+
 		} else {
 			type = Type.MARINE;
 		}
@@ -300,20 +299,7 @@ public class Soldier extends RobotPlayer {
 		if (enemies.length == 0 || type == Type.PROBE) {
 			// find closest allied robot. repel away from that robot.
 			if (allies.length > 0) {
-				// if (nearbyEncamps.length > 0) {
-				// MapLocation closestEncamp =
-				// findClosestMapLocation(nearbyEncamps);
-				// goalLoc = goalLoc.add(
-				// myLoc.directionTo(closestEncamp),
-				// /**
-				// * TODO Balance below, each additional encampment is
-				// * more expensive.
-				// */
-				// peaceEncampAttraction
-				// - (int) (rc.senseCaptureCost() - rc
-				// .getTeamPower()));
-				// }
-
+				
 				MapLocation closestAlly = findClosestRobot(allies);
 				goalLoc = goalLoc.add(myLoc.directionTo(closestAlly),
 						peaceAlliedRepulsion);
@@ -362,6 +348,11 @@ public class Soldier extends RobotPlayer {
 						offFarEnemyAttraction);
 			}
 		}
+		
+		/**
+		 * Attract to Cows!
+		 */
+		goalLoc = goalLoc.add(myLoc.directionTo(centerOfHerd()), cowAttraction);
 
 		/**
 		 * find the direction to the goal location.
@@ -375,6 +366,27 @@ public class Soldier extends RobotPlayer {
 		 * move in that direction.
 		 */
 		simpleMove(finalDir, enemiesClose, enemiesSpotted);
+	}
+
+	protected static MapLocation centerOfHerd() {
+		MapLocation myLoc = rc.getLocation();
+		MapLocation[] inVisionRange = MapLocation
+				.getAllMapLocationsWithinRadiusSq(myLoc, vision);
+		int totalWeight = 0;
+		int x = 0;
+		int y = 0;
+		for (MapLocation loc : inVisionRange) {
+			try {
+				double weight = rc.senseCowsAtLocation(loc);
+				totalWeight += weight;
+				x += weight * loc.x;
+				y += weight * loc.y;
+			} catch (GameActionException e) {
+				e.printStackTrace();
+				System.out.println("Error trying to find center of herd");
+			}
+		}
+		return new MapLocation(x/totalWeight, y/totalWeight);
 	}
 
 	/**
@@ -430,7 +442,9 @@ public class Soldier extends RobotPlayer {
 			/**
 			 * check if we can move the direction we are looking.
 			 */
-			if (rc.canMove(lookingAtCurrently)) {
+			if (rc.canMove(lookingAtCurrently)
+					&& rc.senseTerrainTile(rc.getLocation().add(
+							lookingAtCurrently)) != TerrainTile.VOID) {
 
 				if (!enemiesClose) {
 					rc.move(lookingAtCurrently);
@@ -438,12 +452,13 @@ public class Soldier extends RobotPlayer {
 				}
 				// TODO fix this so we avoid mines when enemies are
 				// close
-			} else {
-				rc.move(lookingAtCurrently);
-				break lookAround;
+				else {
+					rc.move(lookingAtCurrently);
+					break lookAround;
+				}
+
 			}
 		}
-		// }
 	}
 
 	/**
@@ -500,140 +515,4 @@ public class Soldier extends RobotPlayer {
 		return closestLoc;
 	}
 
-	/**
-	 * ARTILLERY PLACEMENT<br>
-	 * Determines if current location between our HQ and the Enemy HQ.
-	 * 
-	 * @return boolean true if good spot for artillery, false if not.
-	 */
-	protected static boolean goodArtillery() {
-		int y = hqLoc.y - myLoc.y;
-		int x = hqLoc.x - myLoc.x;
-		int slopeX = hqLoc.x - enemyHQLoc.x;
-		int slopeY = hqLoc.y - enemyHQLoc.y;
-		int hqDistToEnemyHQ = hqLoc.distanceSquaredTo(enemyHQLoc);
-
-		// only build arty if it is between our hq and enemy hq.
-		if (myLoc.distanceSquaredTo(enemyHQLoc) < hqDistToEnemyHQ) {
-
-			final int offset = 5; // determines how big of a swath of arty.
-			for (int i = -offset; i < offset; i++) {
-				if (slopeX == 0) {
-					// Divide by 0.
-					return true;
-				}
-				if ((y + i) == (slopeY / slopeX) * (x)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * FILTER ENCAMPS<br>
-	 * Removes friendly encampments from an array.
-	 * 
-	 * @param allEncampments
-	 *            All the encampments on the map.
-	 * @param alliedEncampments
-	 *            All the encampments we have captured.
-	 * @return MapLocation[]; Containing encampments that we don't own.
-	 * @throws GameActionException
-	 */
-	public static MapLocation[] filterEncamps(MapLocation[] allEncampments,
-			MapLocation[] alliedEncampments) throws GameActionException {
-
-		// locate uncaptured encampments within a certain radius
-		MapLocation[] neutralEncampments = new MapLocation[allEncampments.length];
-		int neInd = 0;
-
-		// Compute nearest encampment (counting the enemy HQ)
-		outer: for (MapLocation encamp : allEncampments) {
-			for (MapLocation alliedEncamp : alliedEncampments)
-				if (alliedEncamp.equals(encamp))
-					continue outer;
-
-			// add to neutral encampments list
-			neutralEncampments[neInd] = encamp;
-			neInd = neInd + 1;
-
-		}
-		rc.setIndicatorString(2,
-				"neutral enc det " + neInd + " round " + Clock.getRoundNum());
-
-		return neutralEncampments;
-	}
-
-	/**
-	 * NEAREST ENCAMP<br>
-	 * Finds the closest encampment to the HQ.
-	 * 
-	 * @param encampments
-	 *            An array of encampments.
-	 * @param searchPoint
-	 *            the MapLocation we are searching from.
-	 * @return MapLocation; The closest encampment to the HQ.
-	 * @throws GameActionException
-	 */
-	public static MapLocation nearestEncamp(MapLocation[] encampments,
-			MapLocation searchPoint) throws GameActionException {
-		// locate uncaptured encampments within a certain radius
-		MapLocation closestFreeEncamp = null;
-		int shortestDist = 100000000;
-		int dist;
-
-		// Compute nearest encampment (counting the enemy HQ)
-		for (MapLocation encamp : encampments) {
-			if (encamp != null) {
-				dist = searchPoint.distanceSquaredTo(encamp);
-				if (dist < shortestDist) {
-					shortestDist = dist;
-					closestFreeEncamp = encamp;
-				}
-			}
-
-		}
-
-		if (shortestDist < 10000000) {
-			// proceed to an encampment and capture it
-			return closestFreeEncamp;
-		} else {// no encampments to capture; change state
-			return null;
-		}
-	}
-
-	/**
-	 * FAR FROM ENEMY ENCAMP<br>
-	 * Finds encampment farthest from enemy HQ.
-	 * 
-	 * @param encampments
-	 *            An array of encampments.
-	 * @return MapLocation; The farthest from the enemy HQ.
-	 * @throws GameActionException
-	 */
-	public static MapLocation farFromEnemyEncamp(MapLocation[] encampments)
-			throws GameActionException {
-		// locate uncaptured encampments within a certain radius
-		MapLocation farthestEncamp = null;
-		int longestDistance = -1;
-		int dist;
-
-		// Compute nearest encampment (counting the enemy HQ)
-		for (MapLocation encamp : encampments) {
-			if (encamp != null) {
-				dist = enemyHQLoc.distanceSquaredTo(encamp);
-				if (dist > longestDistance) {
-					longestDistance = dist;
-					farthestEncamp = encamp;
-				}
-			}
-		}
-		if (longestDistance > -1) {
-			// proceed to an encampment and capture it
-			return farthestEncamp;
-		} else {// no encampments to capture; change state
-			return null;
-		}
-	}
 }

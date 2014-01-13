@@ -7,13 +7,14 @@ import battlecode.common.TerrainTile;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import java.util.Stack;
 
 public class AStar {
 
 	/**
 	 * array to keep track of cost to reach squares.
 	 */
-	static int[][] costArr;
+	static AStarNode[][] costArr;
 	static MapLocation objective;
 	static RobotController rc;
 
@@ -21,9 +22,10 @@ public class AStar {
 			MapLocation goal, RobotController rc2) {
 
 		// reiniatlize values to avoid garbage collection.
-		costArr = new int[100][100];
+
 		objective = goal;
 		rc = rc2;
+		costArr = new AStarNode[rc.getMapWidth()][rc.getMapHeight()];
 
 		// declare Comparator and Priority Queue.
 		Comparator<MapLocation> comparator = new MapLocationComparator();
@@ -33,10 +35,12 @@ public class AStar {
 		// add the start location to the openList.
 		openList.add(currentLoc);
 		// start location has cost 0.
-		costArr[currentLoc.x][currentLoc.y] = 0;
+		costArr[currentLoc.x][currentLoc.y] = new AStarNode(currentLoc.x,
+				currentLoc.y, 0, calculateHeuristic(currentLoc, goal), false,
+				true, true, null);
 
 		boolean pathFound = false; // done flag.
-		ArrayList<MapLocation> path = new ArrayList<>();
+		ArrayList<MapLocation> closedList = new ArrayList<>();
 		int mapHeight = rc.getMapHeight();
 		int mapWidth = rc.getMapWidth();
 
@@ -44,12 +48,18 @@ public class AStar {
 			// get the "best" next location from the heap.
 			MapLocation loc = openList.poll();
 			// add the adjacent squares to this spot to the heap.
-			addAdjacentSquares(openList, loc, mapHeight, mapWidth, path);
+			addAdjacentSquares(openList, loc, mapHeight, mapWidth);
 			// add this location to the list of the path we want to follow.
-			path.add(loc);
+			closedList.add(loc);
+			if(loc.x == objective.x && loc.y == objective.y){
+				pathFound = true;
+			}
 		}
+		
+		//PathFound 
+		
 
-		return (MapLocation[]) path.toArray();
+		return (extractPath(closedList.remove(closedList.size() - 1)));
 
 	}
 
@@ -65,11 +75,10 @@ public class AStar {
 
 		@Override
 		public int compare(MapLocation o1, MapLocation o2) {
-			int o1h = calculateHeuristic(o1, objective);
-			int o2h = calculateHeuristic(o2, objective);
-			if (o1h + costArr[o1.x][o1.y] < o2h + costArr[o2.x][o2.y]) {
+			
+			if (costArr[o1.x][o1.y].combinedScore < costArr[o2.x][o2.y].combinedScore) {
 				return -1;
-			} else if (o1h + costArr[o1.x][o1.y] > o2h + costArr[o2.x][o2.y]) {
+			} else if (costArr[o1.x][o1.y].combinedScore > costArr[o2.x][o2.y].combinedScore) {
 				return 1;
 			} else {
 				return 0;
@@ -114,14 +123,13 @@ public class AStar {
 	 */
 	private static void addAdjacentSquares(
 			PriorityQueue<MapLocation> priorityQueue, MapLocation loc,
-			int mapHeight, int mapWidth, ArrayList<MapLocation> path) {
+			int mapHeight, int mapWidth) {
 		for (int i = -1; i <= 1; i++) {
 			inner: for (int j = -1; j <= 1; j++) {
 				// check for bounds and also to make sure we don't re-add the
 				// square.
 				if ((i == 0 && j == 0) || loc.x + i < 0 || loc.y + j < 0
-						|| loc.x + i > mapHeight || loc.y + j > mapWidth
-						|| locationAlreadyOnList(loc, path)) {
+						|| loc.x + i > mapHeight || loc.y + j > mapWidth) {
 					break inner;
 				} else {
 					MapLocation temp = new MapLocation(loc.x + i, loc.y + j);
@@ -131,14 +139,23 @@ public class AStar {
 						break inner;
 					} else if (temp.equals(TerrainTile.ROAD)) {
 						// roads cost .7 of normal tiles.
-						if (costArr[temp.x][temp.y] == 0
-								|| costArr[temp.x][temp.y] + 7 < costArr[temp.x][temp.y]) {
-							costArr[temp.x][temp.y] = costArr[loc.x][loc.y] + 7;
+						if (costArr[temp.x][temp.y] == null
+								|| costArr[temp.x][temp.y].lowestCostSoFar + 7 < costArr[temp.x][temp.y].lowestCostSoFar) {
+							
+							costArr[temp.x][temp.y] = new AStarNode(temp.x,
+									temp.y,
+									costArr[loc.x][loc.y].lowestCostSoFar + 7,
+									calculateHeuristic(temp, objective), false,
+									false, true, costArr[loc.x][loc.y]);
 						}
 					} else {
-						if (costArr[temp.x][temp.y] == 0
-								|| costArr[temp.x][temp.y] + 7 < costArr[temp.x][temp.y]) {
-							costArr[temp.x][temp.y] = costArr[loc.x][loc.y] + 10;
+						if (costArr[temp.x][temp.y] == null
+								|| costArr[temp.x][temp.y].lowestCostSoFar + 10 < costArr[temp.x][temp.y].lowestCostSoFar) {
+							costArr[temp.x][temp.y] = costArr[temp.x][temp.y] = new AStarNode(temp.x,
+									temp.y,
+									costArr[loc.x][loc.y].lowestCostSoFar + 10,
+									calculateHeuristic(temp, objective), false,
+									false, true, costArr[loc.x][loc.y]);
 						}
 					}
 					priorityQueue.add(temp);
@@ -146,14 +163,14 @@ public class AStar {
 			}
 		}
 	}
-
-	private static boolean locationAlreadyOnList(MapLocation locationToCheck,
-			ArrayList<MapLocation> path) {
-		for (MapLocation square : path) {
-			if (square.x == locationToCheck.x && square.y == locationToCheck.y) {
-				return true;
-			}
+	
+	private static MapLocation[] extractPath(MapLocation loc){
+		AStarNode node = costArr[loc.x][loc.y];
+		Stack<MapLocation> stack = new Stack<>();
+		while(node.parent!=null){
+			stack.add(new MapLocation(node.x, node.y));
+			node = node.parent;
 		}
-		return false;
+		return (MapLocation[])stack.toArray();
 	}
 }

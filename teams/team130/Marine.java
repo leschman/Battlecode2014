@@ -1,6 +1,5 @@
 package team130;
 
-import battlecode.common.Clock;
 import battlecode.common.MapLocation;
 
 /**
@@ -40,24 +39,26 @@ public class Marine extends Soldier {
 			 * Determines when we should attack based on round number.
 			 */
 			MapLocation goal = rallyPt;
-			int clock = Clock.getRoundNum();
-			if (clock < 250) {
-				goal = rallyPt;
-			} else if (clock < 550) {
-				goal = enemyHQLoc;
-			} else if (clock < 700) {
-				goal = rallyPt;
-			} else if (clock < 900) {
-				goal = enemyHQLoc;
-			} else if (clock < 1300) {
-				goal = rallyPt;
-			} else if (clock < 1600) {
-				goal = enemyHQLoc;
-			} else if (clock < 2000) {
-				goal = rallyPt;
-			} else {
-				goal = enemyHQLoc;
-			}
+			goal = enemyHQLoc;
+//			int clock = Clock.getRoundNum();
+//			if (clock < 250) {
+//				goal = rallyPt;
+//			} else if (clock < 550) {
+//				goal = enemyHQLoc;
+//			} else if (clock < 700) {
+//				goal = rallyPt;
+//			} else if (clock < 900) {
+//				goal = enemyHQLoc;
+//			} else if (clock < 1300) {
+//				goal = rallyPt;
+//			} else if (clock < 1600) {
+//				goal = enemyHQLoc;
+//			} else if (clock < 2000) {
+//				goal = rallyPt;
+//			} else {
+//				goal = enemyHQLoc;
+//			}
+			
 			status = 1;
 			/**
 			 * TODO: We need to explore not using mines to attack, or in

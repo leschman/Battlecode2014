@@ -50,11 +50,7 @@ public class RobotPlayer {
 	 */
 	public static void run(RobotController myRC) {
 		rc = myRC;
-		if (rc.getTeam() == Team.A)
-			/**
-			 * Change mult base on what team we are.
-			 */
-			mult = 104;
+		
 
 		while (true) {
 			try {

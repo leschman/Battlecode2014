@@ -219,6 +219,8 @@ public class Soldier extends RobotPlayer {
 	/**
 	 * WHAT TYPE AM I<br>
 	 * 
+	 * HARD CODED TO ALWAYS MAKE MARINES
+	 * 
 	 * A personality test driven by selective reproduction and an engineered
 	 * society mechanics.<br>
 	 * <br>
@@ -228,18 +230,20 @@ public class Soldier extends RobotPlayer {
 	 * 2: Probe. <br>
 	 */
 	private static Type whatTypeAmI(int numUnitsMade) {
-		int charlesJungTest = (numUnitsMade % 10);
-		if (charlesJungTest > 4) {
-			type = Type.MARINE; // Marine
-			// System.out.println("Made Marine");
-
-		} else if (2 < charlesJungTest && charlesJungTest <= 4) {
-			type = Type.DEFENDER;
-
-		} else {
-			type = Type.MARINE;
-		}
-		return type;
+//		int charlesJungTest = (numUnitsMade % 10);
+//		if (charlesJungTest > 4) {
+//			type = Type.MARINE; // Marine
+//			// System.out.println("Made Marine");
+//
+//		} else if (2 < charlesJungTest && charlesJungTest <= 4) {
+//			type = Type.DEFENDER;
+//
+//		} else {
+//			type = Type.MARINE;
+//		}
+		
+		
+		return Type.MARINE;
 	}
 
 	/**

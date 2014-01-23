@@ -17,7 +17,10 @@ public class Probe extends Soldier {
 				rallyPt = pickACorner();
 			}
 			if(targetWeight(myLoc.distanceSquaredTo(rallyPt)) == 3){
-				rc.construct(RobotType.NOISETOWER);
+				if(random.nextBoolean()){
+				rc.construct(RobotType.NOISETOWER);}else{
+					rc.construct(RobotType.PASTR);
+				}
 			}else{
 			swarmMove(rallyPt);
 			}

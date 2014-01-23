@@ -61,6 +61,10 @@ public class RobotPlayer {
 					Soldier.run();
 				} else if (rc.getType() == RobotType.HQ) {
 					HQ.run();
+				} else if (rc.getType() == RobotType.NOISETOWER){
+					NoiseTower.run();
+				} else if (rc.getType() == RobotType.PASTR){
+					//TODO: do we want PASTR code?
 				}
 			} catch (Exception e) {
 				System.out.println("caught exception before it killed us:");

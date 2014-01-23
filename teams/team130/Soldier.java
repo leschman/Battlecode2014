@@ -197,7 +197,9 @@ public class Soldier extends RobotPlayer {
 					case DEFENDER:
 						Defender.run();
 						break;
-
+					case PROBE:
+						Probe.run();
+						break;
 					default:
 						/**
 						 * Shouldn't ever happen but just in case.
@@ -230,20 +232,19 @@ public class Soldier extends RobotPlayer {
 	 * 2: Probe. <br>
 	 */
 	private static Type whatTypeAmI(int numUnitsMade) {
-//		int charlesJungTest = (numUnitsMade % 10);
-//		if (charlesJungTest > 4) {
-//			type = Type.MARINE; // Marine
-//			// System.out.println("Made Marine");
-//
-//		} else if (2 < charlesJungTest && charlesJungTest <= 4) {
-//			type = Type.DEFENDER;
-//
-//		} else {
-//			type = Type.MARINE;
-//		}
+		int charlesJungTest = (numUnitsMade % 10);
+		if (charlesJungTest > 4) {
+			type = Type.MARINE; // Marine
+			// System.out.println("Made Marine");
+
+		} else if (2 < charlesJungTest && charlesJungTest <= 4) {
+			type = Type.PROBE;
+
+		} else {
+			type = Type.MARINE;
+		}
 		
-		
-		return Type.MARINE;
+		return type;
 	}
 
 	/**

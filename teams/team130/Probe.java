@@ -12,23 +12,27 @@ public class Probe extends Soldier {
 	// create a new random
 	static Random random = new Random(rc.getRobot().getID());
 
-	public static void run(){
-		try{
-			//set goal to a corner.
-			if(rallyPt.equals(hqLoc)){
+	public static void run() {
+		try {
+			// set goal to a corner.
+			if (rallyPt.equals(hqLoc)) {
 				rallyPt = pickACorner();
 			}
-			if(targetWeight(myLoc.distanceSquaredTo(rallyPt)) == 3){
-				if(!noiseTowerArround()){
-				rc.construct(RobotType.NOISETOWER);}else{
-					rc.construct(RobotType.PASTR);
+			if (targetWeight(myLoc.distanceSquaredTo(rallyPt)) == 3) {
+				if (!noiseTowerArround()) {
+					rc.construct(RobotType.NOISETOWER);
+				} else {
+					if (!pastrArround()) {
+						rc.construct(RobotType.PASTR);
+					} else {
+						rallyPt = pickACorner();
+					}
 				}
-			}else{
-			swarmMove(rallyPt);
+			} else {
+				swarmMove(rallyPt);
 			}
-			
-			
-		}catch(Exception e){
+
+		} catch (Exception e) {
 			System.out.println("Probe Exception");
 			e.printStackTrace();
 		}
@@ -51,20 +55,39 @@ public class Probe extends Soldier {
 			return new MapLocation(0, rc.getMapHeight());
 		}
 	}
-	
-	private static boolean noiseTowerArround() throws GameActionException{
-		Robot[] nearRobots = rc.senseNearbyGameObjects(Robot.class, vision, rc.getTeam());
-		for(Robot robot: nearRobots){
-			if(rc.canSenseObject(robot)){
-				battlecode.common.RobotInfo robotInfo = rc.senseRobotInfo(robot);
-				if(robotInfo.type == RobotType.NOISETOWER){
+
+	private static boolean noiseTowerArround() throws GameActionException {
+		Robot[] nearRobots = rc.senseNearbyGameObjects(Robot.class, vision,
+				rc.getTeam());
+		for (Robot robot : nearRobots) {
+			if (rc.canSenseObject(robot)) {
+				battlecode.common.RobotInfo robotInfo = rc
+						.senseRobotInfo(robot);
+				if (robotInfo.type == RobotType.NOISETOWER) {
 					return true;
-				}else if(robotInfo.isConstructing){
+				} else if (robotInfo.constructingType == RobotType.NOISETOWER) {
 					return true;
 				}
 			}
 		}
 		return false;
 	}
-	
+
+	private static boolean pastrArround() throws GameActionException {
+		Robot[] nearRobots = rc.senseNearbyGameObjects(Robot.class, vision,
+				rc.getTeam());
+		for (Robot robot : nearRobots) {
+			if (rc.canSenseObject(robot)) {
+				battlecode.common.RobotInfo robotInfo = rc
+						.senseRobotInfo(robot);
+				if (robotInfo.type == RobotType.PASTR) {
+					return true;
+				} else if (robotInfo.constructingType == RobotType.PASTR) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 }

@@ -1,6 +1,10 @@
 package team130;
 
-import battlecode.common.*;
+import battlecode.common.Clock;
+import battlecode.common.GameConstants;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
+import battlecode.common.RobotType;
 
 /**
  * 

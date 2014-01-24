@@ -2,7 +2,6 @@ package team130;
 
 import java.util.Random;
 
-import battlecode.client.viewer.AbstractDrawObject.RobotInfo;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.Robot;

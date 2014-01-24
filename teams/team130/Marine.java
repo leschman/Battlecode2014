@@ -22,20 +22,7 @@ public class Marine extends Soldier {
 			 * Declare us to be a Marine for debugging
 			 */
 			rc.setIndicatorString(0, "Marine");
-			/**
-			 * Creates a wave of mines to advance on the enemy
-			 */
-			// mineDefenceStrategy();
-
-			if (rallyPt == hqLoc) {
-				int msg = rc.readBroadcast(getChannel());
-				if (msg != 0) {
-					rc.setIndicatorString(1, "Recieved: " + msg);
-					rallyPt = intToMaplocation(msg);
-				}
-
-			}
-
+			
 			/**
 			 * randomly broadcast to throw off enemy.
 			 */

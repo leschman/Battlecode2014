@@ -53,7 +53,7 @@ public class Soldier extends RobotPlayer {
 	 */
 	final static int offNearEnemyAttraction = 10;
 
-	final static int cowAttraction = 10;
+	final static int cowAttraction = 5;
 
 	/**
 	 * Attraction from far enemy units when we out-number enemy.
@@ -133,8 +133,7 @@ public class Soldier extends RobotPlayer {
 	 * UNINITALIZED: type not set yet.
 	 */
 	protected static enum Type {
-		MARINE, DEFENDER, PROBE, UNINITALIZED
-
+		MARINE, PROBE, UNINITALIZED
 	}
 
 	/**
@@ -194,9 +193,9 @@ public class Soldier extends RobotPlayer {
 					case MARINE:
 						Marine.run();
 						break;
-					case DEFENDER:
-						//Defender.run();
-						break;
+//					case DEFENDER:
+//						//Defender.run();
+//						break;
 					case PROBE:
 						Probe.run();
 						break;
@@ -327,13 +326,11 @@ public class Soldier extends RobotPlayer {
 			// we need this check this because the array could still be null
 			if (nearbyEnemies.length > 0) {// avoid enemy
 				MapLocation closestEnemy = findClosestRobot(nearbyEnemies);
-				/**
-				 * If Enemy is on an encampment, he probably IS an encampment,
-				 * Attack.
-				 */
-
 				goalLoc = goalLoc.add(myLoc.directionTo(closestEnemy),
 						defEnemyRepulsion);
+				if(rc.canAttackSquare(closestEnemy)){
+					rc.attackSquare(closestEnemy);
+				}
 
 			}
 
@@ -350,6 +347,10 @@ public class Soldier extends RobotPlayer {
 				MapLocation closestEnemy = findClosestRobot(nearbyEnemies);
 				goalLoc = goalLoc.add(myLoc.directionTo(closestEnemy),
 						offNearEnemyAttraction);
+				if(rc.canAttackSquare(closestEnemy)){
+					rc.attackSquare(closestEnemy);
+				}
+				
 			} else {// no nearby enemies; go toward far enemy
 				MapLocation closestEnemy = findClosestRobot(enemies);
 				goalLoc = goalLoc.add(myLoc.directionTo(closestEnemy),

@@ -51,7 +51,7 @@ public class NoiseTower extends RobotPlayer {
 					if (targetY >= 0 && targetY < rc.getMapHeight()) {
 						if ((RANGE[x] * RANGE[x]) + (RANGE[y] * RANGE[y]) < 300) {
 							// inbounds, fire.
-							if (targetX != myLoc.x && targetY != myLoc.y) {
+							if (!(targetX == myLoc.x && targetY == myLoc.y)) {
 								if (rc.getActionDelay() > 0) {
 									actionDelayWait();
 								}

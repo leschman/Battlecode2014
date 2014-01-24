@@ -38,9 +38,9 @@ public class RobotPlayer {
 	 * Enemy HQ Location.
 	 */
 	static MapLocation enemyHQLoc;
-	
+
 	/**
-	 * The channel we are communicating on. 
+	 * The channel we are communicating on.
 	 */
 	static int channel;
 
@@ -53,11 +53,11 @@ public class RobotPlayer {
 	 *            Robot controller for calling functions.
 	 */
 	public static void run(RobotController myRC) {
-		rc = myRC;
-		
+		try {
+			rc = myRC;
+			enemyHQLoc = rc.senseEnemyHQLocation();
+			while (true) {
 
-		while (true) {
-			try {
 				/**
 				 * Select what type of robot is executing and run it's code.
 				 */
@@ -65,16 +65,17 @@ public class RobotPlayer {
 					Soldier.run();
 				} else if (rc.getType() == RobotType.HQ) {
 					HQ.run();
-				} else if (rc.getType() == RobotType.NOISETOWER){
+				} else if (rc.getType() == RobotType.NOISETOWER) {
 					NoiseTower.run();
-				} else if (rc.getType() == RobotType.PASTR){
+				} else if (rc.getType() == RobotType.PASTR) {
 					PASTR.run();
 				}
-			} catch (Exception e) {
-				System.out.println("caught exception before it killed us:");
-				e.printStackTrace();
+
+				rc.yield();
 			}
-			rc.yield();
+		} catch (Exception e) {
+			System.out.println("caught exception before it killed us:");
+			e.printStackTrace();
 		}
 	}
 
@@ -100,7 +101,7 @@ public class RobotPlayer {
 	 *            MapLocation to broadcast.
 	 * @return int; Representing that location
 	 * 
-	 *         TODO: get rid of scrambling, not needed in this version. 
+	 *         TODO: get rid of scrambling, not needed in this version.
 	 */
 	public static int mapLocationToInt(MapLocation loc) {
 		return loc.x * 1000 + loc.y;
@@ -115,7 +116,7 @@ public class RobotPlayer {
 	 *            The int from the message.
 	 * @return MapLocation; From the message int.
 	 * 
-	 *         TODO: get rid of scrambling, not needed in this version. 
+	 *         TODO: get rid of scrambling, not needed in this version.
 	 */
 	public static MapLocation intToMaplocation(int mint) {
 		int y = mint % 1000;

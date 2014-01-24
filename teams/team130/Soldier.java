@@ -273,6 +273,9 @@ public class Soldier extends RobotPlayer {
 		 * The weighting of target based on distance. Higher if farther.
 		 */
 		int targetWeighting = targetWeight(myLoc.distanceSquaredTo(target));
+		if(type == Type.PROBE){
+			targetWeighting *= 3;
+		}
 
 		/**
 		 * The 'ideal' location for this robot to be in based on the heuristics.
@@ -377,7 +380,7 @@ public class Soldier extends RobotPlayer {
 		MapLocation myLoc = rc.getLocation();
 		MapLocation[] inVisionRange = MapLocation
 				.getAllMapLocationsWithinRadiusSq(myLoc, vision);
-		int totalWeight = 0;
+		int totalWeight = 1;
 		int x = 0;
 		int y = 0;
 		for (MapLocation loc : inVisionRange) {

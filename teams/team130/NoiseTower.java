@@ -13,7 +13,11 @@ public class NoiseTower extends RobotPlayer {
 	 */
 	private static int[] RANGE = { 17, 15, 13, 11, 9, 7, 5, 0, -17, -15, -11,
 			-9, -7, -5, 0 };
-
+	/**
+	 * boolean to track if location has been broadcast and is registered. 
+	 */
+	private static boolean locationRegistered = false;
+	
 	/**
 	 * Variable to track direction last shot.
 	 */
@@ -23,6 +27,10 @@ public class NoiseTower extends RobotPlayer {
 		try {
 			myLoc = rc.getLocation();
 			if (rc.isActive()) {
+				int channel = checkLocationRegistered();
+				if(!locationRegistered){
+					rc.broadcast(channel, mapLocationToInt(myLoc));;
+				}
 				shootNoise();
 			}
 
@@ -115,6 +123,25 @@ public class NoiseTower extends RobotPlayer {
 		while (rc.getActionDelay() > 0) {
 			rc.yield();
 		}
+	}
+	
+	private static int checkLocationRegistered() throws GameActionException{
+		//set false while we check. 
+		locationRegistered = false;
+		int myLocInt = mapLocationToInt(myLoc);
+		int lastOpenChannel = -1;
+		
+		for(int i = 0; i < 20; i++){
+			int broadcast = rc.readBroadcast(i);
+			if(myLocInt == broadcast){
+				//location has been registered. 
+				locationRegistered = true;
+				return (-1);
+			}else if(lastOpenChannel == -1 && broadcast == 0){
+				lastOpenChannel = i;
+			}
+		}
+		return lastOpenChannel;
 	}
 
 }

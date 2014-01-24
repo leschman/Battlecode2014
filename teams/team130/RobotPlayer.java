@@ -64,7 +64,7 @@ public class RobotPlayer {
 				} else if (rc.getType() == RobotType.NOISETOWER){
 					NoiseTower.run();
 				} else if (rc.getType() == RobotType.PASTR){
-					//TODO: do we want PASTR code?
+					PASTR.run();
 				}
 			} catch (Exception e) {
 				System.out.println("caught exception before it killed us:");
@@ -98,7 +98,7 @@ public class RobotPlayer {
 	 * 
 	 *         TODO: get rid of scrambling, not needed in this version. 
 	 */
-	public static int MapLocationToInt(MapLocation loc) {
+	public static int mapLocationToInt(MapLocation loc) {
 		return loc.x * 1000 + loc.y;
 	}
 

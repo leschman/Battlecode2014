@@ -2,7 +2,10 @@ package team130;
 
 import java.util.Random;
 
+import battlecode.client.viewer.AbstractDrawObject.RobotInfo;
+import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
+import battlecode.common.Robot;
 import battlecode.common.RobotType;
 
 public class Probe extends Soldier {
@@ -17,7 +20,7 @@ public class Probe extends Soldier {
 				rallyPt = pickACorner();
 			}
 			if(targetWeight(myLoc.distanceSquaredTo(rallyPt)) == 3){
-				if(random.nextBoolean()){
+				if(!noiseTowerArround()){
 				rc.construct(RobotType.NOISETOWER);}else{
 					rc.construct(RobotType.PASTR);
 				}
@@ -49,4 +52,20 @@ public class Probe extends Soldier {
 			return new MapLocation(0, rc.getMapHeight());
 		}
 	}
+	
+	private static boolean noiseTowerArround() throws GameActionException{
+		Robot[] nearRobots = rc.senseNearbyGameObjects(Robot.class, vision, rc.getTeam());
+		for(Robot robot: nearRobots){
+			if(rc.canSenseObject(robot)){
+				battlecode.common.RobotInfo robotInfo = rc.senseRobotInfo(robot);
+				if(robotInfo.type == RobotType.NOISETOWER){
+					return true;
+				}else if(robotInfo.isConstructing){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 }

@@ -1,5 +1,6 @@
 package team130;
 
+import battlecode.common.Clock;
 import battlecode.common.MapLocation;
 
 /**
@@ -36,28 +37,18 @@ public class Marine extends Soldier {
 			}
 
 			/**
+			 * randomly broadcast to throw off enemy.
+			 */
+			if(Clock.getRoundNum() % 50 == 0){
+				rc.broadcast(200, -1);
+			}
+			
+			/**
 			 * Determines when we should attack based on round number.
 			 */
 			MapLocation goal = rallyPt;
 			goal = enemyHQLoc;
-//			int clock = Clock.getRoundNum();
-//			if (clock < 250) {
-//				goal = rallyPt;
-//			} else if (clock < 550) {
-//				goal = enemyHQLoc;
-//			} else if (clock < 700) {
-//				goal = rallyPt;
-//			} else if (clock < 900) {
-//				goal = enemyHQLoc;
-//			} else if (clock < 1300) {
-//				goal = rallyPt;
-//			} else if (clock < 1600) {
-//				goal = enemyHQLoc;
-//			} else if (clock < 2000) {
-//				goal = rallyPt;
-//			} else {
-//				goal = enemyHQLoc;
-//			}
+
 			
 			status = 1;
 			/**

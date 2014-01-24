@@ -195,7 +195,7 @@ public class Soldier extends RobotPlayer {
 						Marine.run();
 						break;
 					case DEFENDER:
-						Defender.run();
+						//Defender.run();
 						break;
 					case PROBE:
 						Probe.run();

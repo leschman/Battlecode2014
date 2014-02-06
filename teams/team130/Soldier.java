@@ -236,11 +236,9 @@ public class Soldier extends RobotPlayer {
 			type = Type.MARINE; // Marine
 			// System.out.println("Made Marine");
 
-		} else if (2 < charlesJungTest && charlesJungTest <= 4) {
+		} else if (charlesJungTest <= 4) {
 			type = Type.PROBE;
 
-		} else {
-			type = Type.MARINE;
 		}
 		
 		return type;
@@ -455,17 +453,10 @@ public class Soldier extends RobotPlayer {
 					&& rc.senseTerrainTile(rc.getLocation().add(
 							lookingAtCurrently)) != TerrainTile.VOID) {
 
-				if (!enemiesClose) {
+				if (rc.getActionDelay() == 0) {
 					rc.move(lookingAtCurrently);
 					break lookAround;
 				}
-				// TODO fix this so we avoid mines when enemies are
-				// close
-				else {
-					rc.move(lookingAtCurrently);
-					break lookAround;
-				}
-
 			}
 		}
 	}

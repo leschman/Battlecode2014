@@ -49,7 +49,7 @@ public class Probe extends Soldier {
 			return new MapLocation(rc.getMapWidth(), 0);
 		} else if (choice < .75) {
 			// go to bottom right
-			return new MapLocation(rc.getMapWidth(), rc.getMapHeight());
+			return new MapLocation(rc.getMapWidth(), rc.getMapHeight() - 7);
 		} else {
 			// go to bottom left
 			return new MapLocation(0, rc.getMapHeight());
